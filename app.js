@@ -12,7 +12,7 @@ dotenv.config();
 
 const app = express();
 const prisma = new PrismaClient();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3004;
 const JWT_SECRET =
   process.env.JWT_SECRET ||
   "blood-donation-app-secure-fallback-key-2024-must-be-changed";
