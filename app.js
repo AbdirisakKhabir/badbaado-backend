@@ -1315,18 +1315,9 @@ app.delete("/api/requests/:id", async (req, res) => {
 
 // Delete user account
 // Soft delete user account (recommended)
-app.put("/api/users/deactivate-account", async (req, res) => {
+app.delete("/api/users/:id/deactivate", async (req, res) => {
   try {
-    const token = req.headers.authorization?.replace("Bearer ", "");
-
-    if (!token) {
-      return res.status(401).json({ error: "Authentication required" });
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decoded.userId;
-
-    console.log(`🔒 Deactivating account for user: ${userId}`);
+    const userId = req.params.id;
 
     const user = await prisma.user.findUnique({
       where: { id: parseInt(userId) },
@@ -1343,12 +1334,10 @@ app.put("/api/users/deactivate-account", async (req, res) => {
         isActive: false,
         isEligible: false,
         deactivatedAt: new Date(),
-        phone: `deactivated_${user.phone}_${Date.now()}`, // Make phone unique
+        phone: `deactivated_${user.phone}_${Date.now()}`,
         email: user.email ? `deactivated_${user.email}_${Date.now()}` : null,
       },
     });
-
-    console.log(`✅ Account deactivated for user: ${userId}`);
 
     res.json({
       success: true,
