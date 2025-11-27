@@ -1316,51 +1316,34 @@ app.delete("/api/requests/:id", async (req, res) => {
 // Delete user account
 app.delete("/api/users/:id/deactivate", async (req, res) => {
   try {
-    const userId = req.params.id;
-    console.log("🟡 Received DELETE request for user ID:", userId);
+    const userId = parseInt(req.params.id);
+
+    console.log("🟡 Deleting user:", userId);
 
     const user = await prisma.user.findUnique({
-      where: { id: parseInt(userId) },
+      where: { id: userId },
     });
 
-    console.log("🟢 Found user:", user);
-
     if (!user) {
-      console.log("❌ User not found");
       return res.status(404).json({ error: "User not found" });
     }
 
-    const newPhone = `deactivated_${user.phone}_${Date.now()}`;
-    const newEmail = user.email
-      ? `deactivated_${user.email}_${Date.now()}`
-      : null;
-
-    console.log("📞 New phone:", newPhone);
-    console.log("📧 New email:", newEmail);
-
-    const deactivatedUser = await prisma.user.update({
-      where: { id: parseInt(userId) },
-      data: {
-        isActive: false,
-        isEligible: false,
-        deactivatedAt: new Date(),
-        phone: newPhone,
-        email: newEmail,
-      },
+    // Hard delete user
+    await prisma.user.delete({
+      where: { id: userId },
     });
 
-    console.log("✅ User deactivated:", deactivatedUser);
+    console.log("🗑️ User deleted:", userId);
 
     res.json({
       success: true,
-      message: "Account deactivated successfully",
-      deactivatedAt: deactivatedUser.deactivatedAt,
+      message: "User deleted permanently",
     });
   } catch (error) {
-    console.error("🔥 Deactivate account error:", error);
+    console.error("🔥 Delete user error:", error);
     res.status(500).json({
       success: false,
-      error: "Failed to deactivate account",
+      error: "Failed to delete user",
     });
   }
 });
